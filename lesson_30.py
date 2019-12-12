@@ -31,8 +31,7 @@ class WhatProduct(Exception):
 
 
 class Product:
-    def __init__(self, product_id: int, name: str, price: float, in_stock: int = 10, discount: float = 0.8):
-        self.id = product_id
+    def __init__(self, name: str, price: float, in_stock: int = 10, discount: float = 0.8):
         self.name = name
         self.price = price
         self.discount = discount  # Сложность 2) Сделать возможность задавать скидку при инициализации продукта
@@ -44,6 +43,9 @@ class Product:
         # Сложность 4) a) Дописать возможность добавлять продукты на склад,
         self.in_stock += count
 
+    def __str__(self):
+        return f"{self.name} (обычный продукт)"
+
 
 class VipProduct(Product):
     """ класс продукта  без скидки """
@@ -53,6 +55,9 @@ class VipProduct(Product):
 
     def __init__(self, name: str, price: float, in_stock: int = 10, discount: float = 1):
         super().__init__(name=name, price=price, in_stock=in_stock, discount=discount)
+
+    def __str__(self):
+        return f"{self.name} (VIP продукт)"
 
 
 class Buyer:
@@ -92,23 +97,27 @@ class Buyer:
                 product.set_in_stock(-want_to_buy)
                 return True
             else:
-                print(f'у покупателя {self.name} не хватает денег на покупку {want_to_buy} {product.name}')
-                print(f'денег хватит на покупку {self.get_quantity_of_product(product)} {product.name}')
+                print(
+                    f'\033[91mу покупателя {self.name} не хватает денег на покупку {want_to_buy} {product.name}\033[0m')
+                print(f'\033[92mденег хватит на покупку {self.get_quantity_of_product(product)} {product.name}\033[0m')
         else:
-            print(f'на складе {product.in_stock} {product.name}')
+            print(f'\033[91mна складе {product.in_stock} {product.name}\033[0m')
         return False
 
     def get_discount(self, product):
         """ значение дисконта на продукт у покупателя """
         return 1
 
-    def discount_pct(self, product):
+    def percent_discount(self, product):
         return round(100 - 100 * self.get_discount(product))
 
     def set_budget(self, how_mach_money: float):
         """ изменяет бюджет покупателя"""
         # Сложность 4) b) и пополнять бюджет клиента
         self.budget = round(self.budget + how_mach_money, ndigits=2)
+
+    def __str__(self):
+        return f"{self.name} (обычный покупатель)"
 
 
 class VipBuyer(Buyer):
@@ -121,6 +130,9 @@ class VipBuyer(Buyer):
         """ значение дисконта на продукт у покупателя """
         return super().get_discount(product) * product.discount
 
+    def __str__(self):
+        return f"{self.name} (VIP покупатель)"
+
 
 class SuperVipBuyer(VipBuyer):
     """ SuperVip покупатель скидка 36% """
@@ -132,38 +144,35 @@ class SuperVipBuyer(VipBuyer):
         """ значение дисконта на продукт у покупателя """
         return super().get_discount(product) * product.discount
 
+    def __str__(self):
+        return f"{self.name} (SuperVip покупатель)"
+
 
 if __name__ == "__main__":
     # начальные данные ------------------------------------------------------------------
-    bread = Product(name='Bread', price=10, in_stock=200)
-    wine = Product(name='Wine', price=60, in_stock=200)
-    pepper = Product(name='pepper', price=10, in_stock=100)
-    grecha = VipProduct(name=' grecha', price=10, in_stock=100)
+    bread = Product(name='хлеб', price=10, in_stock=200)
+    wine = Product(name='вино', price=60, in_stock=200)
+    pepper = Product(name='перец', price=10, in_stock=100)
+    smuzzi = VipProduct(name='смузи', price=10, in_stock=100)
+    products = [bread, wine, pepper, smuzzi]
 
-    usr = Buyer(name="Petro", budget=100)
-    vip_usr = VipBuyer(name="Pavlo", budget=100)
-    super_vip_user = SuperVipBuyer(name="Stepan", budget=100)
-    user_list = [usr, vip_usr, super_vip_user]
+    usr = Buyer(name="Петро", budget=100)
+    vip_usr = VipBuyer(name="Павло", budget=100)
+    super_vip_user = SuperVipBuyer(name="Остап", budget=100)
+    users = [usr, vip_usr, super_vip_user]
 
     # сколько продуктов одного вида пользователь может купить ------------------------------------------------------
+    for this in products:
+        for user in users:
+            print(f"{user} может купить {user.get_quantity_of_product(this)}"
+                  f" {this} c дисконтом {user.percent_discount(this)}%")
+        print("\n")
 
-    # print(usr.get_quantity_of_product(product=bread))
-    # print(vip_usr.get_quantity_of_product(product=bread))
-    # print(super_vip_user.get_quantity_of_product(product=bread))
-
-    # print(usr.get_quantity_of_product(product=grecha))
-    # print(vip_usr.get_quantity_of_product(product=grecha))
-    # print(super_vip_user.get_quantity_of_product(product=grecha))
-    #
-    # print(usr.get_quantity_of_product(product=pepper))
-    # print(vip_usr.get_quantity_of_product(product=pepper))
-    # print(super_vip_user.get_quantity_of_product(product=pepper))
-
-    # покупка продуктов ------------------------------------------------------------------
-    what = bread
-    how = 11
-    for user in user_list:
-        print(f"До: у {user.name} {user.budget} денег | на складе {what.in_stock} {what.name}")
-        print(f"{user.name} хочет купить {how} {what.name} по цене {what.price} c дисконтом {user.discount_pct(what)}%")
-        print(f"результат {user.buy(what, how)}")
-        print(f"После: у {user.name} {user.budget} денег | на складе {what.in_stock} {what.name}\n")
+    # покупка продуктов -----------------------------------------------------------------
+    it = bread
+    count = 11
+    for user in users:
+        print(f"До: у {user.name} {user.budget} денег | на складе {it.in_stock} {it.name}")
+        print(f"{user.name} хочет купить {count} {it.name} по цене {it.price} c дисконтом {user.percent_discount(it)}%")
+        print(f"результат {user.buy(it, count)}")
+        print(f"После: у {user.name} {user.budget} денег | на складе {it.in_stock} {it.name}\n")
