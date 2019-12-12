@@ -31,7 +31,8 @@ class WhatProduct(Exception):
 
 
 class Product:
-    def __init__(self, name: str, price: float, in_stock: int = 10, discount: float = 0.8):
+    def __init__(self, product_id: int, name: str, price: float, in_stock: int = 10, discount: float = 0.8):
+        self.id = product_id
         self.name = name
         self.price = price
         self.discount = discount  # Сложность 2) Сделать возможность задавать скидку при инициализации продукта
@@ -101,7 +102,7 @@ class Buyer:
         """ значение дисконта на продукт у покупателя """
         return 1
 
-    def percent_discount(self, product):
+    def discount_pct(self, product):
         return round(100 - 100 * self.get_discount(product))
 
     def set_budget(self, how_mach_money: float):
@@ -159,10 +160,10 @@ if __name__ == "__main__":
     # print(super_vip_user.get_quantity_of_product(product=pepper))
 
     # покупка продуктов ------------------------------------------------------------------
-    it = bread
-    count = 11
+    what = bread
+    how = 11
     for user in user_list:
-        print(f"До: у {user.name} {user.budget} денег | на складе {it.in_stock} {it.name}")
-        print(f"{user.name} хочет купить {count} {it.name} по цене {it.price} c дисконтом {user.percent_discount(it)}%")
-        print(f"результат {user.buy(it, count)}")
-        print(f"После: у {user.name} {user.budget} денег | на складе {it.in_stock} {it.name}\n")
+        print(f"До: у {user.name} {user.budget} денег | на складе {what.in_stock} {what.name}")
+        print(f"{user.name} хочет купить {how} {what.name} по цене {what.price} c дисконтом {user.discount_pct(what)}%")
+        print(f"результат {user.buy(what, how)}")
+        print(f"После: у {user.name} {user.budget} денег | на складе {what.in_stock} {what.name}\n")
